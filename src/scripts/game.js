@@ -28,6 +28,16 @@ export class Game {
    * @type {SimObject | null}
    */
   selectedObject = null;
+  /**
+   * Ghost building that follows the mouse cursor
+   * @type {THREE.Group | null}
+   */
+  ghostBuilding = null;
+  /**
+   * Current ghost building type
+   * @type {string | null}
+   */
+  ghostBuildingType = null;
 
   constructor(city) {
     this.city = city;
@@ -144,6 +154,7 @@ export class Game {
   draw() {
     this.city.draw();
     this.updateFocusedObject();
+    this.updateGhostBuilding();
 
     if (this.inputManager.isLeftMouseDown) {
       this.useTool();
@@ -183,7 +194,22 @@ export class Game {
       default:
         if (this.focusedObject) {
           const { x, y } = this.focusedObject;
+          // Temporarily hide ghost building during placement
+          const wasGhostVisible = this.ghostBuilding?.visible;
+          if (this.ghostBuilding) {
+            this.ghostBuilding.visible = false;
+          }
+          
           this.city.placeBuilding(x, y, window.ui.activeToolId);
+          
+          // Restore ghost building visibility after a short delay
+          if (this.ghostBuilding && wasGhostVisible) {
+            setTimeout(() => {
+              if (this.ghostBuilding) {
+                this.ghostBuilding.visible = true;
+              }
+            }, 50);
+          }
         }
         break;
     }
@@ -240,6 +266,113 @@ export class Game {
   onResize() {
     this.cameraManager.resize(window.ui.gameWindow);
     this.renderer.setSize(window.ui.gameWindow.clientWidth, window.ui.gameWindow.clientHeight);
+  }
+
+  /**
+   * Checks if the current tool is a building tool
+   * @param {string} toolId 
+   * @returns {boolean}
+   */
+  isBuildingTool(toolId) {
+    return toolId && toolId !== 'select' && toolId !== 'bulldoze';
+  }
+
+  /**
+   * Creates a ghost building for the specified building type
+   * @param {string} buildingType 
+   */
+  createGhostBuilding(buildingType) {
+    this.removeGhostBuilding();
+
+    const ghostGroup = new THREE.Group();
+    
+    // Create a temporary simObject for the ghost building
+    const tempSimObject = new SimObject();
+    
+    // Create the ghost building mesh based on building type
+    let ghostMesh;
+    
+    if (buildingType === 'road') {
+      // For roads, use a simple straight road model
+      ghostMesh = window.assetManager.getModel('road-straight', tempSimObject, true);
+    } else if (buildingType === 'power-plant') {
+      ghostMesh = window.assetManager.getModel('power-plant', tempSimObject, true);
+    } else if (buildingType === 'power-line') {
+      ghostMesh = window.assetManager.getModel('power-line', tempSimObject, true);
+    } else {
+      // For zones, use under-construction model as preview
+      ghostMesh = window.assetManager.getModel('under-construction', tempSimObject, true);
+    }
+
+    // Make the ghost building semi-transparent and tinted
+    ghostMesh.traverse((obj) => {
+      if (obj.material) {
+        obj.material.transparent = true;
+        obj.material.opacity = 0.7;
+        obj.material.color = new THREE.Color(0x00ff00); // Green by default (valid placement)
+      }
+    });
+
+    // Set ghost building to a different layer to avoid raycasting interference
+    ghostMesh.layers.set(1);
+    
+    ghostGroup.add(ghostMesh);
+    this.ghostBuilding = ghostGroup;
+    this.ghostBuildingType = buildingType;
+    this.scene.add(this.ghostBuilding);
+  }
+
+  /**
+   * Updates the ghost building position and appearance
+   */
+  updateGhostBuilding() {
+    const currentTool = window.ui.activeToolId;
+
+    // Show ghost building only for building tools
+    if (this.isBuildingTool(currentTool)) {
+      // Create ghost building if it doesn't exist or type changed
+      if (!this.ghostBuilding || this.ghostBuildingType !== currentTool) {
+        this.createGhostBuilding(currentTool);
+      }
+
+      // Update ghost building position to follow mouse
+      if (this.ghostBuilding && this.focusedObject) {
+        const tile = this.focusedObject;
+        this.ghostBuilding.position.set(tile.x, 0, tile.y);
+
+        // Check if placement is valid
+        const isValidPlacement = tile && !tile.building;
+        
+        // Update ghost building color based on validity
+        this.ghostBuilding.traverse((obj) => {
+          if (obj.material) {
+            if (isValidPlacement) {
+              obj.material.color = new THREE.Color(0x00ff00); // Green for valid
+            } else {
+              obj.material.color = new THREE.Color(0xff0000); // Red for invalid
+            }
+          }
+        });
+
+        this.ghostBuilding.visible = true;
+      } else if (this.ghostBuilding) {
+        this.ghostBuilding.visible = false;
+      }
+    } else {
+      // Remove ghost building for non-building tools
+      this.removeGhostBuilding();
+    }
+  }
+
+  /**
+   * Removes the ghost building from the scene
+   */
+  removeGhostBuilding() {
+    if (this.ghostBuilding) {
+      this.scene.remove(this.ghostBuilding);
+      this.ghostBuilding = null;
+      this.ghostBuildingType = null;
+    }
   }
 }
 
