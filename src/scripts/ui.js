@@ -30,6 +30,80 @@ export class GameUI {
   hideLoadingText() {
     document.getElementById('loading').style.visibility = 'hidden';
   }
+
+  /**
+   * Shows the city name modal
+   */
+  showCityNameModal() {
+    const modal = document.getElementById('city-name-modal');
+    const input = document.getElementById('city-name-input');
+    const startBtn = document.getElementById('start-game-btn');
+
+    modal.style.display = 'flex';
+    
+    // Focus on input after animation
+    setTimeout(() => {
+      input.focus();
+    }, 600);
+
+    // Handle start button click
+    startBtn.onclick = () => {
+      this.startGameWithCityName();
+    };
+
+    // Handle Enter key in input
+    input.onkeydown = (event) => {
+      if (event.key === 'Enter') {
+        this.startGameWithCityName();
+      }
+    };
+
+    // Enable/disable start button based on input
+    input.oninput = () => {
+      const cityName = input.value.trim();
+      startBtn.disabled = cityName.length === 0;
+      
+      if (cityName.length === 0) {
+        startBtn.style.background = '#ccc';
+        startBtn.style.cursor = 'not-allowed';
+      } else {
+        startBtn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+        startBtn.style.cursor = 'pointer';
+      }
+    };
+
+    // Initialize button state
+    startBtn.disabled = true;
+    startBtn.style.background = '#ccc';
+    startBtn.style.cursor = 'not-allowed';
+  }
+
+  /**
+   * Starts the game with the entered city name
+   */
+  startGameWithCityName() {
+    const input = document.getElementById('city-name-input');
+    const cityName = input.value.trim();
+
+    if (cityName.length === 0) {
+      // Shake animation for empty input
+      input.style.animation = 'shake 0.5s ease-in-out';
+      setTimeout(() => {
+        input.style.animation = '';
+      }, 500);
+      return;
+    }
+
+    // Hide modal with animation
+    const modal = document.getElementById('city-name-modal');
+    modal.style.animation = 'fadeOut 0.3s ease-out forwards';
+    
+    setTimeout(() => {
+      modal.style.display = 'none';
+      modal.style.animation = '';
+      window.game.startGame(cityName);
+    }, 300);
+  }
   
   /**
    * 

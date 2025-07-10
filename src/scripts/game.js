@@ -57,12 +57,7 @@ export class Game {
      */
     window.assetManager = new AssetManager(() => {
       window.ui.hideLoadingText();
-
-      this.city = new City(16);
-      this.initialize(this.city);
-      this.start();
-
-      setInterval(this.simulate.bind(this), 1000);
+      window.ui.showCityNameModal();
     });
 
     window.addEventListener('resize', this.onResize.bind(this), false);
@@ -118,6 +113,17 @@ export class Game {
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
   }
   
+  /**
+   * Starts the game with the given city name
+   * @param {string} cityName 
+   */
+  startGame(cityName) {
+    this.city = new City(16, cityName);
+    this.initialize(this.city);
+    this.start();
+    setInterval(this.simulate.bind(this), 1000);
+  }
+
   /**
    * Starts the renderer
    */

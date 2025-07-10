@@ -1,0 +1,230 @@
+@font-face {
+  font-family: 'Bebas-Regular';
+  src: url('/fonts/Bebas-Regular.otf');
+}
+
+@font-face {
+  font-family: 'Digitalt';
+  src: url('/fonts/Digitalt.otf');
+}
+
+body {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  color: white;
+  font-family: 'Bebas-Regular';
+}
+
+#render-target {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+#title-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 42px;
+  background-color: #34495e;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.title-bar-items {
+  display: flex;
+  align-items: center;
+}
+
+#population-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+#ui-toolbar {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-button {
+  width: 48px;
+  height: 48px;
+  background-color: #34495e;
+  border: 2px solid #2c3e50;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.ui-button.selected {
+  border-color: #f1c40f;
+}
+
+.toolbar-icon {
+  width: 32px;
+  height: 32px;
+}
+
+#info-panel {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 250px;
+  padding: 10px;
+  background-color: #34495e;
+  border: 2px solid #2c3e50;
+  border-radius: 5px;
+}
+
+#instructions {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.9em;
+}
+
+#version {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 0.8em;
+  color: #bdc3c7;
+}
+
+#loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #3498db;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  color: white;
+  font-family: 'Bebas-Regular', sans-serif;
+}
+
+#start-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#start-menu h1 {
+  font-size: 4em;
+  margin-bottom: 20px;
+}
+
+#city-name-input {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 80%;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+#start-game {
+  padding: 15px 30px;
+  border: none;
+  background-color: #2ecc71;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.5em;
+  transition: background-color 0.3s ease;
+}
+
+#start-game:hover {
+  background-color: #27ae60;
+}
+
+#paused-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3em;
+  color: white;
+  z-index: 50;
+}
+
+#loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#start-menu {
+  background: white;
+  padding: 2em;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  color: #333;
+}
+
+#start-menu h1 {
+  margin-bottom: 1em;
+}
+
+#start-menu input {
+  padding: 0.5em;
+  width: 80%;
+  margin-bottom: 1em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#start-menu button {
+  padding: 0.7em 1.5em;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+#start-menu button:hover {
+  background-color: #45a049;
+} 
