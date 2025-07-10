@@ -28,6 +28,10 @@ export class InputManager {
     window.ui.gameWindow.addEventListener('mouseup', this.#onMouseUp.bind(this), false);
     window.ui.gameWindow.addEventListener('mousemove', this.#onMouseMove.bind(this), false);
     window.ui.gameWindow.addEventListener('contextmenu', (event) => event.preventDefault(), false);
+
+    window.ui.gameWindow.addEventListener('touchstart', this.#onTouchStart.bind(this), false);
+    window.ui.gameWindow.addEventListener('touchend', this.#onTouchEnd.bind(this), false);
+    window.ui.gameWindow.addEventListener('touchmove', this.#onTouchMove.bind(this), false);
   }
 
   /**
@@ -72,5 +76,57 @@ export class InputManager {
     this.isMiddleMouseDown = event.buttons & 4;
     this.mouse.x = event.clientX;
     this.mouse.y = event.clientY;
+  }
+
+  /**
+   * Event handler for `touchstart` event
+   * @param {TouchEvent} event 
+   */
+  #onTouchStart(event) {
+    event.preventDefault();
+    
+    // Simulate left mouse button press
+    if (event.touches.length === 1) {
+      this.isLeftMouseDown = true;
+      this.mouse.x = event.touches[0].clientX;
+      this.mouse.y = event.touches[0].clientY;
+    }
+
+    // Simulate middle mouse button press
+    if (event.touches.length === 2) {
+      this.isMiddleMouseDown = true;
+    }
+  }
+
+  /**
+   * Event handler for `touchend` event
+   * @param {TouchEvent} event 
+   */
+  #onTouchEnd(event) {
+    event.preventDefault();
+    this.isLeftMouseDown = false;
+    this.isMiddleMouseDown = false;
+    this.isRightMouseDown = false;
+  }
+
+  /**
+   * Event handler for `touchmove` event
+   * @param {TouchEvent} event 
+   */
+  #onTouchMove(event) {
+    event.preventDefault();
+    
+    // Handle 1-finger swipes
+    if (event.touches.length === 1) {
+      this.mouse.x = event.touches[0].clientX;
+      this.mouse.y = event.touches[0].clientY;
+    }
+
+    // Handle 2-finger swipes
+    if (event.touches.length === 2) {
+      // In a 2-finger swipe, use the center point between the two fingers
+      this.mouse.x = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+      this.mouse.y = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+    }
   }
 }

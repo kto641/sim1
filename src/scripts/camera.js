@@ -2,7 +2,9 @@ import * as THREE from 'three';
 
 // -- Constants --
 const DEG2RAD = Math.PI / 180.0;
+const LEFT_MOUSE_BUTTON = 1;
 const RIGHT_MOUSE_BUTTON = 2;
+const MIDDLE_MOUSE_BUTTON = 4;
 
 // Camera constraints
 const CAMERA_SIZE = 5;
@@ -20,6 +22,36 @@ const PAN_SENSITIVITY = -0.01;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
 export class CameraManager {
+  /**
+   * @type {THREE.OrthographicCamera}
+   */
+  camera;
+  /**
+   * The camera's target
+   * @type {THREE.Vector3}
+   */
+  cameraOrigin;
+  /**
+   * The distance from the camera to the target
+   * @type {number}
+   */
+  cameraRadius;
+  /**
+   * The camera's horizontal rotation angle in degrees
+   * @type {number}
+   */
+  cameraAzimuth;
+  /**
+   * The camera's vertical rotation angle in degrees
+   * @type {number}
+   */
+  cameraElevation;
+  /**
+   * The distance between two fingers when pinching
+   * @type {number}
+   */
+  previousPinchDistance;
+
   constructor() {
     const aspect = window.ui.gameWindow.clientWidth / window.ui.gameWindow.clientHeight;
 
@@ -40,6 +72,9 @@ export class CameraManager {
     window.ui.gameWindow.addEventListener('wheel', this.onMouseScroll.bind(this), false);
     window.ui.gameWindow.addEventListener('mousedown', this.onMouseMove.bind(this), false);
     window.ui.gameWindow.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+
+    window.ui.gameWindow.addEventListener('touchstart', this.onTouchStart.bind(this), false);
+    window.ui.gameWindow.addEventListener('touchmove', this.onTouchMove.bind(this), false);
   }
 
   /**
@@ -62,14 +97,14 @@ export class CameraManager {
    */
   onMouseMove(event) {
     // Handles the rotation of the camera
-    if (event.buttons & RIGHT_MOUSE_BUTTON && !event.ctrlKey) {
+    if (window.ui.activeToolId === 'select' && event.buttons & LEFT_MOUSE_BUTTON) {
       this.cameraAzimuth += -(event.movementX * AZIMUTH_SENSITIVITY);
       this.cameraElevation += (event.movementY * ELEVATION_SENSITIVITY);
       this.cameraElevation = Math.min(MAX_CAMERA_ELEVATION, Math.max(MIN_CAMERA_ELEVATION, this.cameraElevation));
     }
 
     // Handles the panning of the camera
-    if (event.buttons & RIGHT_MOUSE_BUTTON && event.ctrlKey) {
+    if (event.buttons & MIDDLE_MOUSE_BUTTON) {
       const forward = new THREE.Vector3(0, 0, 1).applyAxisAngle(Y_AXIS, this.cameraAzimuth * DEG2RAD);
       const left = new THREE.Vector3(1, 0, 0).applyAxisAngle(Y_AXIS, this.cameraAzimuth * DEG2RAD);
       this.cameraOrigin.add(forward.multiplyScalar(PAN_SENSITIVITY * event.movementY));
@@ -88,6 +123,38 @@ export class CameraManager {
     this.cameraRadius = Math.min(MAX_CAMERA_RADIUS, Math.max(MIN_CAMERA_RADIUS, this.cameraRadius));
 
     this.updateCameraPosition();
+  }
+
+  /**
+   * Event handler for `touchstart` event
+   * @param {TouchEvent} event 
+   */
+  onTouchStart(event) {
+    if (event.touches.length === 2) {
+      this.previousPinchDistance = this.getPinchDistance(event);
+    }
+  }
+
+  /**
+   * Event handler for `touchmove` event
+   * @param {TouchEvent} event 
+   */
+  onTouchMove(event) {
+    // Handles camera zoom
+    if (event.touches.length === 2) {
+      const distance = this.getPinchDistance(event);
+      const delta = this.previousPinchDistance - distance;
+      this.cameraRadius *= 1 - (delta * ZOOM_SENSITIVITY * -5);
+      this.cameraRadius = Math.min(MAX_CAMERA_RADIUS, Math.max(MIN_CAMERA_RADIUS, this.cameraRadius));
+      this.updateCameraPosition();
+      this.previousPinchDistance = distance;
+    }
+  }
+
+  getPinchDistance(event) {
+    const dx = event.touches[0].clientX - event.touches[1].clientX;
+    const dy = event.touches[0].clientY - event.touches[1].clientY;
+    return Math.hypot(dx, dy);
   }
 
   resize() {
