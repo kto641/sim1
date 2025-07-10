@@ -356,7 +356,11 @@ export class GameUI {
 
     // Touch move
     gameWindow.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+      // Only prevent default for game canvas, not UI elements
+      const target = e.target;
+      if (target && target.tagName === 'CANVAS') {
+        e.preventDefault();
+      }
       
       const touches = e.touches;
       
@@ -426,8 +430,22 @@ export class GameUI {
    * Handle touch tap (equivalent to mouse click)
    */
   handleTouchTap(touch) {
+    // Check if touch is on UI elements (avoid game interaction issues)
+    const touchedElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // If touched element is a UI button or panel, don't dispatch to game
+    if (touchedElement && (
+      touchedElement.closest('.ui-button') ||
+      touchedElement.closest('#title-bar') ||
+      touchedElement.closest('#stats-panel') ||
+      touchedElement.closest('#info-panel') ||
+      touchedElement.closest('#ui-toolbar')
+    )) {
+      return; // Let the UI handle this touch
+    }
+    
     // The InputManager will handle coordinate conversion automatically
-    // Just dispatch the original touch event as a mouse event
+    // Just dispatch the original touch event as a mouse event for game interaction
     const mouseEvent = new MouseEvent('click', {
       clientX: touch.clientX,
       clientY: touch.clientY,
@@ -461,7 +479,8 @@ export class GameUI {
    */
   handleTouchZoom(scale) {
     if (window.game && window.game.cameraManager) {
-      const zoomFactor = scale > 1 ? 0.95 : 1.05;
+      // Fix: Reverse the zoom logic - pinch out (scale > 1) should zoom in, pinch in (scale < 1) should zoom out
+      const zoomFactor = scale > 1 ? 1.05 : 0.95;
       window.game.cameraManager.zoom(zoomFactor);
     }
   }
@@ -528,8 +547,8 @@ export class GameUI {
     const infoPanel = document.getElementById('info-panel');
     infoPanel.classList.add('visible');
     
-    // Add backdrop for mobile
-    if (this.isMobile) {
+    // Add backdrop for mobile only when info panel actually has content
+    if (this.isMobile && infoPanel.innerHTML.trim()) {
       this.createBackdrop();
     }
   }

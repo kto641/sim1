@@ -7,6 +7,15 @@ html, body {
   height: 100%;
   margin: 0;
   font-family: Bebas-Regular, sans-serif;
+  
+  /* Disable mobile browser touch effects */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 
   background: linear-gradient(0deg, #3a5177, #81b1e0);
 }
@@ -26,6 +35,11 @@ h1 {
 #render-target {
   position: relative;
   height: 100%;
+  
+  /* Prevent unwanted touch effects on game area */
+  touch-action: pan-x pan-y pinch-zoom;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #instructions {
@@ -594,6 +608,19 @@ html {
     top: var(--titlebar-height);
     right: 0;
     bottom: var(--mobile-toolbar-height);
+    
+    /* Prevent blur effects on game area */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Prevent canvas blur effects */
+  #render-target canvas {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
   }
   
   /* Mobile: Slide-up info panel */
@@ -898,11 +925,19 @@ html {
   display: none;
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: auto;
 }
 
 .mobile-backdrop.visible {
   display: block;
   opacity: 1;
+}
+
+/* Ensure game area is never affected by backdrop blur */
+#render-target,
+#render-target * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* STATISTICS DASHBOARD PREPARATION */
