@@ -37,7 +37,9 @@ export class GameUI {
     isZooming: false,
     isPanning: false,
     startX: 0,
-    startY: 0
+    startY: 0,
+    startTime: 0,
+    isSwipeCandidate: false
   };
   /**
    * Game settings
@@ -151,8 +153,21 @@ export class GameUI {
     if (statsCloseBtn) {
       statsCloseBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         console.log('Stats close clicked'); // Debug log
-        this.toggleStatsPanel();
+        if (this.statsVisible) {
+          this.toggleStatsPanel();
+        }
+      });
+      
+      // Add touch event for better mobile responsiveness
+      statsCloseBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Stats close touched'); // Debug log
+        if (this.statsVisible) {
+          this.toggleStatsPanel();
+        }
       });
     }
     
@@ -317,7 +332,14 @@ export class GameUI {
         // Single touch - potential tap or pan start
         this.touchState.startX = touches[0].clientX;
         this.touchState.startY = touches[0].clientY;
+        this.touchState.startTime = now;
         this.touchState.isPanning = false;
+        this.touchState.isSwipeCandidate = false;
+        
+        // Check if touch started near bottom edge for swipe gesture
+        if (touches[0].clientY > window.innerHeight * 0.8) {
+          this.touchState.isSwipeCandidate = true;
+        }
         
         // Double tap detection
         if (now - lastTap < 300) {
@@ -365,12 +387,28 @@ export class GameUI {
       if (e.touches.length === 0) {
         // All fingers lifted
         if (!this.touchState.isPanning && !this.touchState.isZooming) {
+          // Check for swipe gesture
+          if (this.touchState.isSwipeCandidate && e.changedTouches.length > 0) {
+            const touch = e.changedTouches[0];
+            const deltaY = this.touchState.startY - touch.clientY;
+            const deltaTime = Date.now() - this.touchState.startTime;
+            const velocity = deltaY / deltaTime;
+            
+            // Swipe up gesture to open stats (minimum 100px upward, within 500ms, sufficient velocity)
+            if (deltaY > 100 && deltaTime < 500 && velocity > 0.3 && this.isMobile && !this.statsVisible) {
+              this.toggleStatsPanel();
+              this.hapticFeedback('medium');
+              return;
+            }
+          }
+          
           // Simple tap
           this.handleTouchTap(e.changedTouches[0]);
         }
         
         this.touchState.isZooming = false;
         this.touchState.isPanning = false;
+        this.touchState.isSwipeCandidate = false;
       }
     }, { passive: false });
   }
@@ -514,13 +552,13 @@ export class GameUI {
       backdrop.onclick = () => this.hideInfoPanel();
       document.body.appendChild(backdrop);
     }
-    backdrop.style.display = 'block';
+    backdrop.classList.add('visible');
   }
 
   removeBackdrop() {
     const backdrop = document.getElementById('mobile-backdrop');
     if (backdrop) {
-      backdrop.style.display = 'none';
+      backdrop.classList.remove('visible');
     }
   }
 
@@ -792,10 +830,14 @@ export class GameUI {
       document.body.appendChild(backdrop);
     }
     
-    backdrop.onclick = () => {
+    backdrop.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       switch (type) {
         case 'stats':
-          this.toggleStatsPanel();
+          if (this.statsVisible) {
+            this.toggleStatsPanel();
+          }
           break;
         default:
           this.hideInfoPanel();
@@ -803,7 +845,24 @@ export class GameUI {
       }
     };
     
-    backdrop.style.display = 'block';
+    // Also handle touch events for mobile
+    backdrop.ontouchend = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      switch (type) {
+        case 'stats':
+          if (this.statsVisible) {
+            this.toggleStatsPanel();
+          }
+          break;
+        default:
+          this.hideInfoPanel();
+          break;
+      }
+    };
+    
+    // Use the visible class instead of directly changing display
+    backdrop.classList.add('visible');
   }
 
   /**
