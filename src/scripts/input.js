@@ -23,15 +23,17 @@ export class InputManager {
    */
   isRightMouseDown = false;
 
-  constructor() {
-    window.ui.gameWindow.addEventListener('mousedown', this.#onMouseDown.bind(this), false);
-    window.ui.gameWindow.addEventListener('mouseup', this.#onMouseUp.bind(this), false);
-    window.ui.gameWindow.addEventListener('mousemove', this.#onMouseMove.bind(this), false);
-    window.ui.gameWindow.addEventListener('contextmenu', (event) => event.preventDefault(), false);
+  constructor(gameWindow) {
+    this.gameWindow = gameWindow;
+    
+    this.gameWindow.addEventListener('mousedown', this.#onMouseDown.bind(this), false);
+    this.gameWindow.addEventListener('mouseup', this.#onMouseUp.bind(this), false);
+    this.gameWindow.addEventListener('mousemove', this.#onMouseMove.bind(this), false);
+    this.gameWindow.addEventListener('contextmenu', (event) => event.preventDefault(), false);
 
-    window.ui.gameWindow.addEventListener('touchstart', this.#onTouchStart.bind(this), false);
-    window.ui.gameWindow.addEventListener('touchend', this.#onTouchEnd.bind(this), false);
-    window.ui.gameWindow.addEventListener('touchmove', this.#onTouchMove.bind(this), false);
+    this.gameWindow.addEventListener('touchstart', this.#onTouchStart.bind(this), false);
+    this.gameWindow.addEventListener('touchend', this.#onTouchEnd.bind(this), false);
+    this.gameWindow.addEventListener('touchmove', this.#onTouchMove.bind(this), false);
   }
 
   /**
@@ -74,8 +76,11 @@ export class InputManager {
     this.isLeftMouseDown = event.buttons & 1;
     this.isRightMouseDown = event.buttons & 2;
     this.isMiddleMouseDown = event.buttons & 4;
-    this.mouse.x = event.clientX;
-    this.mouse.y = event.clientY;
+    
+    // Convert to game window relative coordinates
+    const rect = this.gameWindow.getBoundingClientRect();
+    this.mouse.x = event.clientX - rect.left;
+    this.mouse.y = event.clientY - rect.top;
   }
 
   /**
@@ -88,8 +93,10 @@ export class InputManager {
     // Simulate left mouse button press
     if (event.touches.length === 1) {
       this.isLeftMouseDown = true;
-      this.mouse.x = event.touches[0].clientX;
-      this.mouse.y = event.touches[0].clientY;
+      // Convert to game window relative coordinates
+      const rect = this.gameWindow.getBoundingClientRect();
+      this.mouse.x = event.touches[0].clientX - rect.left;
+      this.mouse.y = event.touches[0].clientY - rect.top;
     }
 
     // Simulate middle mouse button press
@@ -116,17 +123,22 @@ export class InputManager {
   #onTouchMove(event) {
     event.preventDefault();
     
+    // Get game window bounds for coordinate conversion
+    const rect = this.gameWindow.getBoundingClientRect();
+    
     // Handle 1-finger swipes
     if (event.touches.length === 1) {
-      this.mouse.x = event.touches[0].clientX;
-      this.mouse.y = event.touches[0].clientY;
+      this.mouse.x = event.touches[0].clientX - rect.left;
+      this.mouse.y = event.touches[0].clientY - rect.top;
     }
 
     // Handle 2-finger swipes
     if (event.touches.length === 2) {
       // In a 2-finger swipe, use the center point between the two fingers
-      this.mouse.x = (event.touches[0].clientX + event.touches[1].clientX) / 2;
-      this.mouse.y = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+      const centerX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+      const centerY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+      this.mouse.x = centerX - rect.left;
+      this.mouse.y = centerY - rect.top;
     }
   }
 }

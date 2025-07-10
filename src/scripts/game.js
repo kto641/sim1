@@ -48,7 +48,7 @@ export class Game {
     this.scene = new THREE.Scene();
 
     this.inputManager = new InputManager(window.ui.gameWindow);
-    this.cameraManager = new CameraManager(window.ui.gameWindow);
+    this.cameraManager = new CameraManager();
 
     // Configure the renderer
     this.renderer.setSize(window.ui.gameWindow.clientWidth, window.ui.gameWindow.clientHeight);
@@ -243,6 +243,8 @@ export class Game {
    * @returns {THREE.Mesh | null}
    */
   #raycast() {
+    // InputManager now stores game window relative coordinates
+    // Convert to normalized device coordinates (-1 to 1)
     var coords = {
       x: (this.inputManager.mouse.x / this.renderer.domElement.clientWidth) * 2 - 1,
       y: -(this.inputManager.mouse.y / this.renderer.domElement.clientHeight) * 2 + 1
