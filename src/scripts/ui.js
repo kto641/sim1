@@ -12,7 +12,7 @@ export class GameUI {
   /**
    * @type {HTMLElement | null }
    */
-  selectedControl = document.getElementById('button-select');
+  selectedControl = null;
   /**
    * True if the game is currently paused
    * @type {boolean}
@@ -102,6 +102,188 @@ export class GameUI {
 
     // Viewport meta tag for mobile
     this.setupViewport();
+    
+    // Setup UI button event listeners
+    this.setupUIEventListeners();
+  }
+  
+  /**
+   * Setup UI button event listeners
+   */
+  setupUIEventListeners() {
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.bindUIEvents();
+      });
+    } else {
+      this.bindUIEvents();
+    }
+  }
+  
+  /**
+   * Bind UI events to DOM elements
+   */
+  bindUIEvents() {
+    console.log('Binding UI events...'); // Debug log
+    
+    // Initialize selected control
+    this.selectedControl = document.getElementById('button-select');
+    if (this.selectedControl) {
+      this.selectedControl.classList.add('selected');
+    }
+    
+    // Statistics panel events
+    const statsToggleBtn = document.getElementById('stats-toggle-btn');
+    const statsCloseBtn = document.getElementById('stats-close-btn');
+    
+    console.log('Stats toggle btn:', statsToggleBtn); // Debug log
+    console.log('Stats close btn:', statsCloseBtn); // Debug log
+    
+    if (statsToggleBtn) {
+      statsToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Stats toggle clicked'); // Debug log
+        this.toggleStatsPanel();
+      });
+    }
+    
+    if (statsCloseBtn) {
+      statsCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Stats close clicked'); // Debug log
+        this.toggleStatsPanel();
+      });
+    }
+    
+    // Settings panel events
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+    const settingsConfirmBtn = document.getElementById('settings-confirm-btn');
+    const resetSettingsBtn = document.getElementById('reset-settings-btn');
+    
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSettings();
+      });
+    }
+    
+    if (settingsCloseBtn) {
+      settingsCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSettings();
+      });
+    }
+    
+    if (settingsConfirmBtn) {
+      settingsConfirmBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleSettings();
+      });
+    }
+    
+    if (resetSettingsBtn) {
+      resetSettingsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.resetSettings();
+      });
+    }
+    
+    // Toolbar button events
+    const toolbarButtons = document.querySelectorAll('.ui-button[data-type]');
+    toolbarButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.onToolSelected(e);
+      });
+    });
+    
+    // Pause button
+    const pauseButton = document.getElementById('button-pause');
+    if (pauseButton) {
+      pauseButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.togglePause();
+      });
+    }
+    
+    // Settings form elements
+    this.bindSettingsEvents();
+    
+    console.log('UI events bound successfully'); // Debug log
+  }
+  
+  /**
+   * Bind settings form events
+   */
+  bindSettingsEvents() {
+    // Master volume
+    const masterVolume = document.getElementById('master-volume');
+    const masterVolumeDisplay = document.getElementById('master-volume-display');
+    if (masterVolume && masterVolumeDisplay) {
+      masterVolume.addEventListener('input', (e) => {
+        const value = e.target.value;
+        masterVolumeDisplay.textContent = `${value}%`;
+        this.updateSetting('masterVolume', value);
+      });
+    }
+    
+    // Sound effects
+    const soundEffects = document.getElementById('sound-effects');
+    if (soundEffects) {
+      soundEffects.addEventListener('change', (e) => {
+        this.updateSetting('soundEffects', e.target.checked);
+      });
+    }
+    
+    // Auto save
+    const autoSave = document.getElementById('auto-save');
+    if (autoSave) {
+      autoSave.addEventListener('change', (e) => {
+        this.updateSetting('autoSave', e.target.checked);
+      });
+    }
+    
+    // Game speed
+    const gameSpeed = document.getElementById('game-speed');
+    if (gameSpeed) {
+      gameSpeed.addEventListener('change', (e) => {
+        this.updateSetting('gameSpeed', e.target.value);
+      });
+    }
+    
+    // Notifications
+    const notifications = document.getElementById('notifications');
+    if (notifications) {
+      notifications.addEventListener('change', (e) => {
+        this.updateSetting('notifications', e.target.checked);
+      });
+    }
+    
+    // UI scale
+    const uiScale = document.getElementById('ui-scale');
+    if (uiScale) {
+      uiScale.addEventListener('change', (e) => {
+        this.updateSetting('uiScale', e.target.value);
+      });
+    }
+    
+    // Haptic feedback
+    const hapticFeedback = document.getElementById('haptic-feedback');
+    if (hapticFeedback) {
+      hapticFeedback.addEventListener('change', (e) => {
+        this.updateSetting('hapticFeedback', e.target.checked);
+      });
+    }
+    
+    // Tooltips
+    const tooltips = document.getElementById('tooltips');
+    if (tooltips) {
+      tooltips.addEventListener('change', (e) => {
+        this.updateSetting('tooltips', e.target.checked);
+      });
+    }
   }
 
   /**
@@ -440,19 +622,47 @@ export class GameUI {
    * Toggle statistics panel
    */
   toggleStatsPanel() {
+    console.log('toggleStatsPanel called, current state:', this.statsVisible);
+    
     this.statsVisible = !this.statsVisible;
     const panel = document.getElementById('stats-panel');
     
+    console.log('Panel element:', panel);
+    console.log('New state:', this.statsVisible);
+    
+    if (!panel) {
+      console.error('Stats panel element not found!');
+      return;
+    }
+    
     if (this.statsVisible) {
       panel.classList.add('visible');
+      // Force style application for better reliability
+      if (this.isMobile) {
+        panel.style.transform = 'translateY(0)';
+      } else {
+        panel.style.transform = 'translateX(0)';
+      }
       this.updateStatistics();
       
       if (this.isMobile) {
         this.createBackdrop('stats');
       }
+      
+      console.log('Panel opened, classes:', panel.className);
+      console.log('Panel transform style:', panel.style.transform);
     } else {
       panel.classList.remove('visible');
+      // Force style application for better reliability
+      if (this.isMobile) {
+        panel.style.transform = 'translateY(100%)';
+      } else {
+        panel.style.transform = 'translateX(100%)';
+      }
       this.removeBackdrop();
+      
+      console.log('Panel closed, classes:', panel.className);
+      console.log('Panel transform style:', panel.style.transform);
     }
 
     // Haptic feedback
@@ -823,4 +1033,13 @@ export class GameUI {
   }
 }
 
-window.ui = new GameUI();
+// Initialize UI when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing UI...');
+    window.ui = new GameUI();
+  });
+} else {
+  console.log('DOM already loaded, initializing UI...');
+  window.ui = new GameUI();
+}

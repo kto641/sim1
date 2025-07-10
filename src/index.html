@@ -61,10 +61,10 @@
         <div class="title-bar-right-items title-bar-items">
           <img id="population-icon" src="/icons/person.png">
           <span id="population-counter">0</span>
-          <button id="stats-toggle-btn" class="mini-button desktop-only" onclick="ui.toggleStatsPanel()" title="통계 보기">
+          <button id="stats-toggle-btn" class="mini-button desktop-only" title="통계 보기">
             📊
           </button>
-          <button id="settings-btn" class="mini-button" onclick="ui.toggleSettings()" title="설정">
+          <button id="settings-btn" class="mini-button" title="설정">
             ⚙️
           </button>
         </div>
@@ -74,7 +74,7 @@
       <div id="stats-panel" class="stats-panel">
         <div class="stats-header">
           <h3>📊 도시 통계</h3>
-          <button id="stats-close-btn" class="close-btn" onclick="ui.toggleStatsPanel()">✕</button>
+          <button id="stats-close-btn" class="close-btn">✕</button>
         </div>
         <div class="stats-content">
           <div class="stats-item">
@@ -118,19 +118,19 @@
           <div class="modal-content settings-modal">
             <div class="modal-header">
               <h1>⚙️ 게임 설정</h1>
-              <button class="close-btn" onclick="ui.toggleSettings()">✕</button>
+              <button id="settings-close-btn" class="close-btn">✕</button>
             </div>
             <div class="modal-body">
               <div class="settings-section">
                 <h3>🎵 오디오</h3>
                 <div class="setting-item">
                   <label for="master-volume">마스터 볼륨</label>
-                  <input type="range" id="master-volume" min="0" max="100" value="50" oninput="ui.updateSetting('masterVolume', this.value)">
+                  <input type="range" id="master-volume" min="0" max="100" value="50">
                   <span id="master-volume-display">50%</span>
                 </div>
                 <div class="setting-item">
                   <label for="sound-effects">효과음</label>
-                  <input type="checkbox" id="sound-effects" checked onchange="ui.updateSetting('soundEffects', this.checked)">
+                  <input type="checkbox" id="sound-effects" checked>
                 </div>
               </div>
               
@@ -138,11 +138,11 @@
                 <h3>🎮 게임플레이</h3>
                 <div class="setting-item">
                   <label for="auto-save">자동 저장</label>
-                  <input type="checkbox" id="auto-save" checked onchange="ui.updateSetting('autoSave', this.checked)">
+                  <input type="checkbox" id="auto-save" checked>
                 </div>
                 <div class="setting-item">
                   <label for="game-speed">게임 속도</label>
-                  <select id="game-speed" onchange="ui.updateSetting('gameSpeed', this.value)">
+                  <select id="game-speed">
                     <option value="0.5">느림</option>
                     <option value="1" selected>보통</option>
                     <option value="2">빠름</option>
@@ -151,7 +151,7 @@
                 </div>
                 <div class="setting-item">
                   <label for="notifications">알림 표시</label>
-                  <input type="checkbox" id="notifications" checked onchange="ui.updateSetting('notifications', this.checked)">
+                  <input type="checkbox" id="notifications" checked>
                 </div>
               </div>
               
@@ -159,7 +159,7 @@
                 <h3>📱 인터페이스</h3>
                 <div class="setting-item">
                   <label for="ui-scale">UI 크기</label>
-                  <select id="ui-scale" onchange="ui.updateSetting('uiScale', this.value)">
+                  <select id="ui-scale">
                     <option value="0.8">작음</option>
                     <option value="1" selected>보통</option>
                     <option value="1.2">큼</option>
@@ -168,56 +168,48 @@
                 </div>
                 <div class="setting-item mobile-only">
                   <label for="haptic-feedback">햅틱 피드백</label>
-                  <input type="checkbox" id="haptic-feedback" checked onchange="ui.updateSetting('hapticFeedback', this.checked)">
+                  <input type="checkbox" id="haptic-feedback" checked>
                 </div>
                 <div class="setting-item">
                   <label for="tooltips">툴팁 표시</label>
-                  <input type="checkbox" id="tooltips" checked onchange="ui.updateSetting('tooltips', this.checked)">
+                  <input type="checkbox" id="tooltips" checked>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="secondary-btn" onclick="ui.resetSettings()">기본값 복원</button>
-              <button class="start-btn" onclick="ui.toggleSettings()">확인</button>
+              <button id="reset-settings-btn" class="secondary-btn">기본값 복원</button>
+              <button id="settings-confirm-btn" class="start-btn">확인</button>
             </div>
           </div>
         </div>
       </div>
 
       <div id="ui-toolbar" class="container">
-        <button id='button-select' class="ui-button selected" data-type="select"
-          onclick="ui.onToolSelected(event)" title="선택 도구">
+        <button id='button-select' class="ui-button selected" data-type="select" title="선택 도구">
           <img class="toolbar-icon" src="/icons/select-color.png">
         </button>
-        <button id='button-bulldoze' class="ui-button" data-type="bulldoze"
-          onclick="ui.onToolSelected(event)" title="철거 도구">
+        <button id='button-bulldoze' class="ui-button" data-type="bulldoze" title="철거 도구">
           <img class="toolbar-icon" src="/icons/bulldozer-color.png">
         </button>
-        <button id='button-residential' class="ui-button" data-type="residential"
-          onclick="ui.onToolSelected(event)" title="주거지역">
+        <button id='button-residential' class="ui-button" data-type="residential" title="주거지역">
           <img class="toolbar-icon" src="/icons/house-color.png">
         </button>
-        <button id='button-commercial' class="ui-button" data-type="commercial"
-          onclick="ui.onToolSelected(event)" title="상업지역">
+        <button id='button-commercial' class="ui-button" data-type="commercial" title="상업지역">
           <img class="toolbar-icon" src="/icons/store-color.png">
         </button>
-        <button id='button-industrial' class="ui-button" data-type="industrial"
-          onclick="ui.onToolSelected(event)" title="산업지역">
+        <button id='button-industrial' class="ui-button" data-type="industrial" title="산업지역">
           <img class="toolbar-icon" src="/icons/factory-color.png">
         </button>
-        <button id='button-road' class="ui-button" data-type="road"
-          onclick="ui.onToolSelected(event)" title="도로">
+        <button id='button-road' class="ui-button" data-type="road" title="도로">
           <img class="toolbar-icon" src="/icons/road-color.png">
         </button>
-        <button id='button-power-plant' class="ui-button" data-type="power-plant"
-          onclick="ui.onToolSelected(event)" title="발전소">
+        <button id='button-power-plant' class="ui-button" data-type="power-plant" title="발전소">
           <img class="toolbar-icon" src="/icons/power-color.png">
         </button>
-        <button id='button-power-line' class="ui-button" data-type="power-line"
-        onclick="ui.onToolSelected(event)" title="전력선">
-        <img class="toolbar-icon" src="/icons/power-line-color.png">
-      </button>
-        <button id='button-pause' class="ui-button" onclick="ui.togglePause()" title="일시정지/재생">
+        <button id='button-power-line' class="ui-button" data-type="power-line" title="전력선">
+          <img class="toolbar-icon" src="/icons/power-line-color.png">
+        </button>
+        <button id='button-pause' class="ui-button" title="일시정지/재생">
           <img id='pause-button-icon' class="toolbar-icon" src="/icons/pause-color.png">
         </button>
       </div>
