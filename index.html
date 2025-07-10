@@ -7,7 +7,7 @@
   <link rel="icon" type="image/x-icon" href="/sim1/favicon.ico">
   
   
-  <script type="module" crossorigin src="/sim1/assets/index-79aa603d.js"></script>
+  <script type="module" crossorigin src="/sim1/assets/index-b2420302.js"></script>
 </head>
 
 <body>
@@ -17,6 +17,30 @@
     <div id="loading" class="text-overlay">
       <div>
         LOADING...
+      </div>
+    </div>
+    <div id="city-name-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-container">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1>🏙️ 새로운 도시 만들기</h1>
+            <p>당신만의 특별한 도시에 이름을 지어주세요!</p>
+          </div>
+          <div class="modal-body">
+            <input 
+              type="text" 
+              id="city-name-input" 
+              placeholder="도시 이름을 입력하세요..."
+              maxlength="20"
+              autocomplete="off"
+            >
+          </div>
+          <div class="modal-footer">
+            <button id="start-game-btn" class="start-btn">
+              <span>🚀 게임 시작!</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     <div id="paused-text" class="text-overlay" style="visibility: hidden;">
